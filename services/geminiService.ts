@@ -32,10 +32,13 @@ export const fetchNutritionData = async (foodQuery: string): Promise<NutritionDa
       },
     });
 
-    const text = response.text;
+    let text = response.text;
     if (!text) {
       throw new Error("No data returned from AI service.");
     }
+
+    // Clean up potential markdown formatting just in case
+    text = text.replace(/```json\s*|\s*```/g, "").trim();
 
     const data: NutritionData = JSON.parse(text);
     return data;

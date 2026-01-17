@@ -10,22 +10,28 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  const performSearch = async (searchTerm: string) => {
+    if (!searchTerm.trim()) return;
 
+    // Ensure the input reflects what is being searched (useful for suggestion clicks)
+    setQuery(searchTerm);
     setLoading(true);
     setError(null);
     setData(null);
 
     try {
-      const result = await fetchNutritionData(query);
+      const result = await fetchNutritionData(searchTerm);
       setData(result);
     } catch (err) {
       setError('Could not analyze this food. Please try a different name or be more specific.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    performSearch(query);
   };
 
   return (
@@ -69,7 +75,7 @@ const App: React.FC = () => {
 
             {/* Search Bar */}
             <div className={`w-full ${data ? 'max-w-3xl mx-auto' : 'max-w-xl mx-auto'}`}>
-              <form onSubmit={handleSearch} className="relative group">
+              <form onSubmit={handleFormSubmit} className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <SearchIcon className={`h-5 w-5 ${loading ? 'text-emerald-500' : 'text-gray-400'}`} />
                 </div>
@@ -103,7 +109,7 @@ const App: React.FC = () => {
                     {['Banana', 'Grilled Salmon', 'Oatmeal', 'Greek Yogurt'].map((item) => (
                         <button 
                             key={item}
-                            onClick={() => { setQuery(item); }} 
+                            onClick={() => performSearch(item)} 
                             className="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-500 hover:border-emerald-200 hover:text-emerald-600 transition-colors"
                         >
                             {item}
